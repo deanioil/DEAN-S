@@ -1,0 +1,36 @@
+{
+  "name": "frontegg-react-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@frontegg/react": "^5.x.x",  // Use the actual version you installed or intend to use
+    "react": "^18.x.x",            // Use your React version
+    "react-dom": "^18.x.x",         // Use your React DOM version
+    "react-router-dom": "^6.x.x"    // Use your React Router DOM version
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.x.x",      // If you are using Tailwind CSS
+    "vite": "^5.x.x"              // If you are using Vite
+    // or "react-scripts": "5.x.x" if using Create React App
+  },
+  "scripts": {
+    "start": "react-scripts start",  // For Create React App
+    "dev": "vite",                   // For Vite
+    "build": "react-scripts build",  // For Create React App
+    "build:vite": "vite build",      // For Vite
+    "preview": "vite preview"        // For Vite
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
+
