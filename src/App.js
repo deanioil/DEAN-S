@@ -1,60 +1,98 @@
-import React, { useState } from 'react';
-// Import useAuth from @frontegg/react
-import { useAuth } from '@frontegg/react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
+import './App.css'; // Assuming you have an App.css file
+import { useAuth, useLoginWithRedirect, ContextHolder } from "@frontegg/react";
 
-// This component will contain the application logic and use Frontegg Hooks
 function App() {
-  // State to manage the displayed message
-  const [message, setMessage] = useState("Dean's home assignment for Frontegg!");
-  // Use Frontegg's authentication hook to get user and authentication status
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const loginWithRedirect = useLoginWithRedirect();
 
-  // Function to update the message
-  const handleClick = () => {
-    setMessage('You clicked the button!');
+  // State for custom message box
+  const [messageBox, setMessageBox] = useState({ visible: false, title: '', content: '' });
+
+  // Function to show custom message box
+  const showMessageBox = (title, content) => {
+    setMessageBox({ visible: true, title, content });
   };
 
-  // Display a loading message while Frontegg is initializing
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm w-full rounded-lg">
-          <p className="text-gray-600 text-lg">Loading Frontegg authentication...</p>
-        </div>
-      </div>
-    );
-  }
+  // Function to hide custom message box
+  const hideMessageBox = () => {
+    setMessageBox({ visible: false, title: '', content: '' });
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      loginWithRedirect();
+    }
+  }, [isAuthenticated, loginWithRedirect]);
+
+  const logout = () => {
+    const baseUrl = ContextHolder.getContext().baseUrl;
+    window.location.href = `${baseUrl}/oauth/logout?post_logout_redirect_uri=${window.location.href}`;
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm w-full rounded-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          {message}
-        </h1>
-        <p className="text-gray-600 mb-6">
-          This is a basic React application integrated with Frontegg.
-        </p>
+    <div className="App min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      {messageBox.visible && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h2 className="text-xl font-bold mb-4">{messageBox.title}</h2>
+            <p className="text-gray-700 mb-6 break-all">{messageBox.content}</p>
+            <button
+              onClick={hideMessageBox}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
-        {/* Display authentication status */}
+      <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm w-full">
         {isAuthenticated ? (
-          <p className="text-green-600 mb-4 font-medium">
-            Welcome, {user?.name || user?.email || 'Authenticated User'}!
-          </p>
+          <div>
+            <div className="mb-4">
+              {user?.profilePictureUrl && (
+                <img
+                  src={user.profilePictureUrl}
+                  alt={user?.name || 'User Profile'}
+                  className="w-24 h-24 rounded-full mx-auto mb-2 object-cover"
+                  onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/96x96/cccccc/333333?text=User"; }} // Placeholder on error
+                />
+              )}
+              <span className="text-lg font-semibold text-gray-800">
+                Logged in as: {user?.name || user?.email || 'Authenticated User'}
+              </span>
+            </div>
+            <div className="mb-4">
+              <button
+                onClick={() => showMessageBox('Access Token', user.accessToken)}
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 w-full"
+              >
+                What is my access token?
+              </button>
+            </div>
+            <div>
+              <button
+                onClick={() => logout()}
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75 w-full"
+              >
+                Click to logout
+              </button>
+            </div>
+          </div>
         ) : (
-          <p className="text-red-600 mb-4 font-medium">
-            You are not authenticated. Please log in through Frontegg.
-          </p>
+          <div>
+            <button
+              onClick={() => loginWithRedirect()}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 w-full"
+            >
+              Click me to login
+            </button>
+          </div>
         )}
-
-        <button
-          onClick={handleClick}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
-        >
-          Change Message
-        </button>
       </div>
     </div>
   );
 }
 
-export default App; // Export App directly
+export default App;
